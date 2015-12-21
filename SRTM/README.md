@@ -8,8 +8,8 @@ This tutorial demonstrates how to load and analyze small tiled SRTM elevation da
 2. Copy the download script to that directory `cp download.sh ~/SRTM/`
 3. Start the download with `nohup ~/SRTM/download.sh &`
 
-Once the process has finished, unzip and remove all archive files by running `cd ~/SRTM && unzip \*.hgt.zip
-rm *.hgt.zip && rm *.hgt.zip`.
+Once the process has finished, unzip and remove all archive files by running `cd ~/SRTM && unzip \*.hgt.zip &&
+rm *.hgt.zip`.
 
 ## Step 2: Ingest the data to SciDB
 Luckily, GDAL can read SRTM files in HGT format. In this example we merge tiles first using `gdal_merge` to simplify the loading procedure. However, latest developments of the [GDAL driver implementation for SciDB array](https://github.com/mappl/scidb4gdal) also support automatical tiled array insertion based on spatial location such that merging is done automatically in the database. To load the data we simply run the following commands at the command line:
@@ -35,10 +35,10 @@ After successful ingestion, the SRTM array in SciDB is spatially referenced, whi
 The following commands demonstrate very basic processing of the SRTM array. All the commands are given in AFL language, which can be executed by any SciDB client.
 
 ```
-# 1. Compute elevation difference in x and y differences
+# 1. Compute elevation difference in x and y directions
 set no fetch;
 store(attribute_rename(build(srtm,iif((x+y) % 2 = 0, 1, -1)), band1, sgn), dummy);
-store(join(apply(join(join(dummy,window(apply(join(srtm, dummy), d, band1*sgn), 0,1,0,0,sum(d) as xsum)),window(apply(join(srtm, dummy), d, band1*sgn), 0,0,0,1,sum(d) as ysum)), dx, xsum*sgn, dy, ysum*sgn),srtm),srtm_dif); # Bounary pixels must be ignored
+store(join(apply(join(join(dummy,window(apply(join(srtm, dummy), d, band1*sgn), 0,1,0,0,sum(d) as xsum)),window(apply(join(srtm, dummy), d, band1*sgn), 0,0,0,1,sum(d) as ysum)), dx, xsum*sgn, dy, ysum*sgn),srtm),srtm_dif); # Boundary pixels must be ignored
 
 # 2. Apply a 5x5 mean filter
 set no fetch;
